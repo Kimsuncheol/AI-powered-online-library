@@ -8,6 +8,7 @@ import { useAuthContext } from '@/app/context/AuthContext';
 export interface AuthUser {
   name: string;
   email: string;
+  role?: Member['role'];
   avatarUrl?: string;
 }
 
@@ -82,6 +83,7 @@ function mapMemberToAuthUser(member: Member): AuthUser {
   return {
     name: member.displayName || member.email,
     email: member.email,
+    role: member.role,
     avatarUrl: member.avatarUrl,
   };
 }

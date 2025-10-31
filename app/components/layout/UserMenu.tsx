@@ -9,6 +9,7 @@ import LibraryBooksRoundedIcon from '@mui/icons-material/LibraryBooksRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LibraryAddRoundedIcon from '@mui/icons-material/LibraryAddRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 
 import { useAuth } from './AuthProvider';
 
@@ -56,6 +57,7 @@ export default function UserMenu({ hideEmail = false }: UserMenuProps) {
         </Typography>
       </Stack>
       <IconButton
+        disableRipple
         color="primary"
         onClick={handleOpenMenu}
         sx={{
@@ -88,12 +90,22 @@ export default function UserMenu({ hideEmail = false }: UserMenuProps) {
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem component={Link} href="/admin/books/new" onClick={handleCloseMenu}>
-          <ListItemIcon>
-            <LibraryAddRoundedIcon fontSize="small" />
-          </ListItemIcon>
-          Register Book
-        </MenuItem>
+        {user.role === 'admin' && (
+          <MenuItem component={Link} href="/admin/books/new" onClick={handleCloseMenu}>
+            <ListItemIcon>
+              <LibraryAddRoundedIcon fontSize="small" />
+            </ListItemIcon>
+            Register Book
+          </MenuItem>
+        )}
+        {user.role === 'admin' && (
+          <MenuItem component={Link} href="/admin/members" onClick={handleCloseMenu}>
+            <ListItemIcon>
+              <PeopleRoundedIcon fontSize="small" />
+            </ListItemIcon>
+            Manage Members
+          </MenuItem>
+        )}
         <MenuItem onClick={handleCloseMenu}>
           <ListItemIcon>
             <LibraryBooksRoundedIcon fontSize="small" />
