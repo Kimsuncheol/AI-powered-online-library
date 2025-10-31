@@ -11,6 +11,7 @@ import {
   signOut as apiSignOut,
   signUp as apiSignUp,
 } from '@/app/lib/api/auth';
+import { subscribeUnauthorized } from '@/app/lib/http';
 
 export interface AuthContextType {
   member: Member | null;
@@ -41,6 +42,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       isMounted.current = false;
     };
+  }, []);
+
+  React.useEffect(() => {
+    const unsubscribe = subscribeUnauthorized(() => {
+      pendingRequests.current = 0;
+      if (isMounted.current) {
+        setMember(null);
+        setIsLoading(false);
+      }
+    });
+    return unsubscribe;
   }, []);
 
   const updateLoadingState = React.useCallback((loading: boolean) => {

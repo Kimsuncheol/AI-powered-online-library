@@ -1,7 +1,7 @@
 'use client';
 
 import type { Member } from '@/app/interfaces/member';
-import { APIError, clearStoredTokens, getStoredAccessToken, handleResponse, resolveUrl } from '@/app/lib/api/auth';
+import { del, get, HttpError, patch as httpPatch } from '@/app/lib/http';
 
 const PROFILE_ENDPOINT = '/profile/me';
 
@@ -14,59 +14,21 @@ export interface MemberUpdatePayload {
   avatarUrl?: string | null;
 }
 
-async function authorizedFetch(input: string, init: RequestInit = {}) {
-  const token = getStoredAccessToken();
-  if (!token) {
-    throw new APIError('Authentication required', 401);
-  }
-
-  const headers = new Headers(init.headers ?? undefined);
-  headers.set('Authorization', `Bearer ${token}`);
-
-  const response = await fetch(resolveUrl(input), {
-    ...init,
-    headers,
-  });
-
-  if (response.status === 401) {
-    clearStoredTokens();
-    throw new APIError('Authentication required', 401, await response.json().catch(() => undefined));
-  }
-
-  return response;
-}
-
 export async function readProfile(): Promise<Member> {
-  const response = await authorizedFetch(PROFILE_ENDPOINT, {
-    method: 'GET',
-  });
-
-  const member = await handleResponse<Member>(response);
-  return member;
+  return get<Member>(PROFILE_ENDPOINT);
 }
 
 export async function updateProfile(payload: MemberUpdatePayload): Promise<Member> {
-  const response = await authorizedFetch(PROFILE_ENDPOINT, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const member = await handleResponse<Member>(response);
-  return member;
+  return httpPatch<Member>(PROFILE_ENDPOINT, { json: payload });
 }
 
 export async function deleteProfile(): Promise<void> {
-  const response = await authorizedFetch(PROFILE_ENDPOINT, {
-    method: 'DELETE',
-  });
-
-  if (response.status === 204) {
-    clearStoredTokens();
-    return;
+  try {
+    await del<void>(PROFILE_ENDPOINT);
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) {
+      return;
+    }
+    throw error;
   }
-
-  await handleResponse<never>(response);
 }

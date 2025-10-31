@@ -106,7 +106,7 @@ export default function UserMenu({ hideEmail = false }: UserMenuProps) {
             Manage Members
           </MenuItem>
         )}
-        <MenuItem onClick={handleCloseMenu}>
+        <MenuItem component={Link} href="/library" onClick={handleCloseMenu}>
           <ListItemIcon>
             <LibraryBooksRoundedIcon fontSize="small" />
           </ListItemIcon>

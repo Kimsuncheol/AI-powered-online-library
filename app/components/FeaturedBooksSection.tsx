@@ -1,8 +1,22 @@
 'use client';
 
 import * as React from 'react';
-import { Box, Card, CardActionArea, CardContent, CardMedia, Chip, Stack, Typography, Skeleton } from '@mui/material';
+import NextLink from 'next/link';
+import {
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Chip,
+  Skeleton,
+  Stack,
+  Typography,
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
+import { ArrowForward } from '@mui/icons-material';
 
 export interface BookSummary {
   id: string;
@@ -112,6 +126,52 @@ export default function FeaturedBooksSection({
                   </CardContent>
                 </Stack>
               </CardActionArea>
+              {loading ? null : item ? (
+                <CardActions
+                  sx={{
+                    px: 3,
+                    pb: 3,
+                    pt: 0,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                  }}
+                >
+                  <Button
+                    component={NextLink}
+                    href={`/books/${item.id}/checkout`}
+                    variant="contained"
+                    size="small"
+                    endIcon={<ArrowForward />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                    }}
+                    sx={{
+                      borderRadius: 999,
+                      fontWeight: 600,
+                      textTransform: 'none',
+                    }}
+                  >
+                    Checkout
+                  </Button>
+                  <Button
+                    component={NextLink}
+                    href="/library"
+                    variant="text"
+                    size="small"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                    }}
+                    sx={{
+                      borderRadius: 999,
+                      fontWeight: 600,
+                      textTransform: 'none',
+                    }}
+                  >
+                    View my checkouts
+                  </Button>
+                </CardActions>
+              ) : null}
             </Card>
           </Grid>
         ))}

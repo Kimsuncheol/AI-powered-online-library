@@ -1,44 +1,15 @@
 'use client';
 
 import type { NewBook, BookOut } from '@/app/interfaces/book';
-import { getStoredAccessToken, handleResponse, resolveUrl } from '@/app/lib/api/auth';
+import { del, get, patch as httpPatch, post } from '@/app/lib/http';
 
 export type BookCreate = NewBook;
 export type BookUpdate = Partial<BookCreate>;
 
 const BOOKS_ENDPOINT = '/books';
 
-function buildAuthHeaders(): Record<string, string> {
-  const token = getStoredAccessToken();
-  if (!token) {
-    return {};
-  }
-
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-}
-
-function buildJsonHeaders(includeAuth = false): HeadersInit {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  if (includeAuth) {
-    Object.assign(headers, buildAuthHeaders());
-  }
-
-  return headers;
-}
-
 export async function createBook(payload: BookCreate): Promise<BookOut> {
-  const response = await fetch(resolveUrl(`${BOOKS_ENDPOINT}/`), {
-    method: 'POST',
-    headers: buildJsonHeaders(true),
-    body: JSON.stringify(payload),
-  });
-
-  return handleResponse<BookOut>(response);
+  return post<BookOut>(`${BOOKS_ENDPOINT}/`, { json: payload });
 }
 
 export async function listBooks(skip?: number, limit?: number, search?: string): Promise<BookOut[]> {
@@ -48,31 +19,18 @@ export async function listBooks(skip?: number, limit?: number, search?: string):
   if (typeof search === 'string' && search.trim().length > 0) params.set('search', search.trim());
 
   const query = params.toString();
-  const response = await fetch(resolveUrl(`${BOOKS_ENDPOINT}/${query ? `?${query}` : ''}`));
-
-  return handleResponse<BookOut[]>(response);
+  const url = `${BOOKS_ENDPOINT}/${query ? `?${query}` : ''}`;
+  return get<BookOut[]>(url);
 }
 
 export async function getBook(bookId: string): Promise<BookOut> {
-  const response = await fetch(resolveUrl(`${BOOKS_ENDPOINT}/${encodeURIComponent(bookId)}`));
-  return handleResponse<BookOut>(response);
+  return get<BookOut>(`${BOOKS_ENDPOINT}/${encodeURIComponent(bookId)}`);
 }
 
 export async function updateBook(bookId: string, payload: BookUpdate): Promise<BookOut> {
-  const response = await fetch(resolveUrl(`${BOOKS_ENDPOINT}/${encodeURIComponent(bookId)}`), {
-    method: 'PATCH',
-    headers: buildJsonHeaders(true),
-    body: JSON.stringify(payload),
-  });
-
-  return handleResponse<BookOut>(response);
+  return httpPatch<BookOut>(`${BOOKS_ENDPOINT}/${encodeURIComponent(bookId)}`, { json: payload });
 }
 
 export async function deleteBook(bookId: string): Promise<void> {
-  const response = await fetch(resolveUrl(`${BOOKS_ENDPOINT}/${encodeURIComponent(bookId)}`), {
-    method: 'DELETE',
-    headers: buildAuthHeaders(),
-  });
-
-  await handleResponse<void>(response);
+  await del<void>(`${BOOKS_ENDPOINT}/${encodeURIComponent(bookId)}`);
 }

@@ -19,7 +19,7 @@ import { type Theme } from '@mui/material/styles';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-import { APIError } from '@/app/lib/api/auth';
+import { HttpError } from '@/app/lib/http';
 import { useAuthContext } from '@/app/context/AuthContext';
 
 export interface SignupModalProps {
@@ -181,7 +181,7 @@ export default function SignupModal({ open, onClose, onSuccess, onSwitchToLogin 
         setSuccessMessage('Account created successfully.');
       })
       .catch((error: unknown) => {
-        if (error instanceof APIError) {
+        if (error instanceof HttpError) {
           if (error.status === 422) {
             setApiError('We could not create your account. Check your details and try again.');
           } else {

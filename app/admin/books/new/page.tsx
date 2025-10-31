@@ -6,7 +6,7 @@ import { Alert, Container, Snackbar } from '@mui/material';
 import type { NewBook } from '@/app/interfaces/book';
 import { BookForm } from '@/app/admin/books/new/BookForm';
 import { createBook } from '@/app/lib/api/books';
-import { APIError, clearStoredTokens } from '@/app/lib/api/auth';
+import { HttpError } from '@/app/lib/http';
 
 type SnackbarState = {
   open: boolean;
@@ -66,13 +66,7 @@ export default function NewBookPage() {
         });
         scheduleRedirect(created?.id);
       } catch (error) {
-        if (error instanceof APIError) {
-          if (error.status === 401 || error.status === 403) {
-            clearStoredTokens();
-            router.push('/login?next=/admin/books/new');
-            return;
-          }
-
+        if (error instanceof HttpError) {
           if (error.status === 400 || error.status === 422) {
             const message = error.message || 'Please review the provided details.';
             setValidationError(message);
@@ -101,7 +95,7 @@ export default function NewBookPage() {
         setIsSubmitting(false);
       }
     },
-    [router, scheduleRedirect],
+    [scheduleRedirect],
   );
 
   const handleReset = useCallback(() => {

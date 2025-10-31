@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { useAuthContext } from '@/app/context/AuthContext';
 import { deleteProfile, readProfile, updateProfile } from '@/app/lib/api/profile';
-import { APIError } from '@/app/lib/api/auth';
+import { HttpError } from '@/app/lib/http';
 import ProfileHeaderCard from './components/ProfileHeaderCard';
 import ProfileInfoForm, { ProfileInfoFormValues } from './components/ProfileInfoForm';
 import ActivitySummaryCard from './components/ActivitySummaryCard';
@@ -92,15 +92,14 @@ export default function ProfilePage() {
       .catch((error: unknown) => {
         if (!active) return;
         const message =
-          error instanceof APIError
+          error instanceof HttpError
             ? error.status === 401
               ? 'Your session has expired. Please sign in again.'
               : error.message
             : 'We could not load your profile. Please try again.';
         setSnackbar({ open: true, type: 'error', message });
-        if (error instanceof APIError && error.status === 401) {
+        if (error instanceof HttpError && error.status === 401) {
           void refreshMember();
-          router.replace('/login?next=/profile');
         }
       })
       .finally(() => {
@@ -149,7 +148,7 @@ export default function ProfilePage() {
         setIsEditing(false);
       } catch (error) {
         const message =
-          error instanceof APIError
+          error instanceof HttpError
             ? error.status === 422
               ? 'Some details were invalid. Please review the highlighted fields.'
               : error.message
@@ -191,7 +190,7 @@ export default function ProfilePage() {
       router.replace('/');
     } catch (error) {
       const message =
-        error instanceof APIError ? error.message : 'We could not delete your account. Please try again.';
+        error instanceof HttpError ? error.message : 'We could not delete your account. Please try again.';
       setSnackbar({ open: true, type: 'error', message });
     } finally {
       setIsDeleting(false);
