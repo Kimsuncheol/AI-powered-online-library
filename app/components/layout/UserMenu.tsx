@@ -8,6 +8,7 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import LibraryBooksRoundedIcon from '@mui/icons-material/LibraryBooksRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import LibraryAddRoundedIcon from '@mui/icons-material/LibraryAddRounded';
 
 import { useAuth } from './AuthProvider';
 
@@ -58,8 +59,6 @@ export default function UserMenu({ hideEmail = false }: UserMenuProps) {
         color="primary"
         onClick={handleOpenMenu}
         sx={{
-          borderRadius: 0,
-          border: '1px solid rgba(59,130,246,0.25)',
           px: 0.75,
           bgcolor: 'background.paper',
         }}
@@ -88,6 +87,12 @@ export default function UserMenu({ hideEmail = false }: UserMenuProps) {
             <SettingsRoundedIcon fontSize="small" />
           </ListItemIcon>
           Settings
+        </MenuItem>
+        <MenuItem component={Link} href="/admin/books/new" onClick={handleCloseMenu}>
+          <ListItemIcon>
+            <LibraryAddRoundedIcon fontSize="small" />
+          </ListItemIcon>
+          Register Book
         </MenuItem>
         <MenuItem onClick={handleCloseMenu}>
           <ListItemIcon>
