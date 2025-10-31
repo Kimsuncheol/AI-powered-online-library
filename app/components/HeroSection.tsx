@@ -80,7 +80,7 @@ export default function HeroSection({
             variant="outlined"
             sx={{ fontWeight: 600, bgcolor: 'rgba(16,185,129,0.08)' }}
           />
-          <Typography variant="h2" component="h1" sx={{ fontSize: { xs: 36, md: 52 } }}>
+          <Typography variant="h2" component="h1" sx={{ color: 'text.secondary', fontSize: { xs: 36, md: 52 } }}>
             {headline}
           </Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 520 }}>

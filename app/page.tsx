@@ -1,11 +1,10 @@
-import { Box, Container, Stack } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import HeroSection from './components/HeroSection';
-import FeaturedBooksSection, { BookSummary } from './components/FeaturedBooksSection';
-import RecommendationCarousel, { Recommendation } from './components/RecommendationCarousel';
-import AIChatWidget from './components/AIChatWidget';
-import QuickAccessPanels, { QuickAction } from './components/QuickAccessPanels';
-import SiteFooter, { SiteFooterLink } from './components/SiteFooter';
+import Dashboard from './components/Dashboard';
+import { HeroSectionProps } from './components/HeroSection';
+import { BookSummary, FeaturedBooksSectionProps } from './components/FeaturedBooksSection';
+import { Recommendation, RecommendationCarouselProps } from './components/RecommendationCarousel';
+import { QuickAction, QuickAccessPanelsProps } from './components/QuickAccessPanels';
+import { AIChatWidgetProps } from './components/AIChatWidget';
+import { SiteFooterLink, SiteFooterProps } from './components/SiteFooter';
 import LibraryBooksRoundedIcon from '@mui/icons-material/LibraryBooksRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import NoteAltRoundedIcon from '@mui/icons-material/NoteAltRounded';
@@ -127,53 +126,50 @@ const footerLinks: SiteFooterLink[] = [
   { id: 'github', label: 'GitHub', href: '#' },
 ];
 
-export default function Home() {
+const heroSection: HeroSectionProps = {
+  headline: 'Discover Books Smarter with AI.',
+  description:
+    'Aurora Library helps you explore, borrow, and collaborate on digital books with conversations, summaries, and recommendations powered by AI.',
+  featuredInsights: ['Conversational search', 'AI summaries', 'Personalized shelves'],
+};
+
+const featuredBooksSection: FeaturedBooksSectionProps = {
+  title: 'Featured collections',
+  description: 'Trending titles the community is enjoying right now. Curated by AI summaries and your reading history.',
+  items: featuredBooks,
+};
+
+const recommendationsSection: RecommendationCarouselProps = {
+  title: 'Recommended for you',
+  subtitle: 'Powered by AI to match your reading journey, skill goals, and recent searches.',
+  items: recommendations,
+};
+
+const quickAccessPanels: QuickAccessPanelsProps = {
+  title: 'Quick access',
+  actions: quickActions,
+};
+
+const chatWidget: AIChatWidgetProps = {
+  messages: [
+    { from: 'assistant', text: 'Hi! I can surface summaries, similar authors, and audio versions for you.' },
+    { from: 'assistant', text: 'Try: “What should I read after Ethical AI in Practice?”' },
+  ],
+};
+
+const footerSection: SiteFooterProps = {
+  links: footerLinks,
+};
+
+export default function DashboardPage() {
   return (
-    <Box
-      sx={{
-        bgcolor: 'background.default',
-        minHeight: '100vh',
-        py: { xs: 6, md: 10 },
-        px: { xs: 0, md: 0 },
-      }}
-    >
-      <Container maxWidth="lg">
-        <Stack spacing={{ xs: 6, md: 10 }}>
-          <HeroSection
-            headline="Discover Books Smarter with AI."
-            description="Aurora Library helps you explore, borrow, and collaborate on digital books with conversations, summaries, and recommendations powered by AI."
-            featuredInsights={['Conversational search', 'AI summaries', 'Personalized shelves']}
-          />
-
-          <Grid container spacing={{ xs: 4, md: 6 }}>
-            <Grid size={{ xs: 12, md: 8 }}>
-              <Stack spacing={{ xs: 4, md: 6 }}>
-                <QuickAccessPanels title="Quick access" actions={quickActions} />
-                <FeaturedBooksSection
-                  title="Featured collections"
-                  description="Trending titles the community is enjoying right now. Curated by AI summaries and your reading history."
-                  items={featuredBooks}
-                />
-                <RecommendationCarousel
-                  title="Recommended for you"
-                  subtitle="Powered by AI to match your reading journey, skill goals, and recent searches."
-                  items={recommendations}
-                />
-              </Stack>
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <AIChatWidget
-                messages={[
-                  { from: 'assistant', text: 'Hi! I can surface summaries, similar authors, and audio versions for you.' },
-                  { from: 'assistant', text: 'Try: “What should I read after Ethical AI in Practice?”' },
-                ]}
-              />
-            </Grid>
-          </Grid>
-
-          <SiteFooter links={footerLinks} />
-        </Stack>
-      </Container>
-    </Box>
+    <Dashboard
+      hero={heroSection}
+      featuredBooks={featuredBooksSection}
+      recommendations={recommendationsSection}
+      quickActions={quickAccessPanels}
+      chatWidget={chatWidget}
+      footer={footerSection}
+    />
   );
 }
