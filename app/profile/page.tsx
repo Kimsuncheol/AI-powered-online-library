@@ -1,10 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { Alert, Container, Snackbar, Stack } from '@mui/material';
+import { Alert, Button, Container, Snackbar, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
-import { useAuth } from '@/app/components/layout/AuthProvider';
+import { useAuthContext } from '@/app/context/AuthContext';
+import { deleteProfile, readProfile, updateProfile } from '@/app/lib/api/profile';
+import { APIError } from '@/app/lib/api/auth';
 import ProfileHeaderCard from './components/ProfileHeaderCard';
 import ProfileInfoForm, { ProfileInfoFormValues } from './components/ProfileInfoForm';
 import ActivitySummaryCard from './components/ActivitySummaryCard';
@@ -16,11 +18,11 @@ interface ActivitySummary {
 }
 
 const INITIAL_PROFILE: ProfileInfoFormValues = {
-  displayName: 'Jordan Reed',
-  bio: 'AI librarian, lifelong learner, and curator of signal in the noise. Always excited about emergent tools.',
-  website: 'https://readwithai.dev',
-  location: 'San Francisco, CA',
-  preferredGenres: ['Artificial Intelligence', 'Data Science', 'Science Fiction'],
+  displayName: '',
+  bio: '',
+  website: '',
+  location: '',
+  preferredGenres: [],
 };
 
 const INITIAL_ACTIVITY: ActivitySummary = {
@@ -48,10 +50,12 @@ function validateProfile(values: ProfileInfoFormValues) {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { member, isInitialized, refreshMember } = useAuthContext();
   const [profile, setProfile] = React.useState<ProfileInfoFormValues>(INITIAL_PROFILE);
   const [isEditing, setIsEditing] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [loadingProfile, setLoadingProfile] = React.useState(true);
   const [validationErrors, setValidationErrors] = React.useState<Partial<Record<keyof ProfileInfoFormValues, string>>>(
     {},
   );
@@ -62,25 +66,59 @@ export default function ProfilePage() {
   });
 
   React.useEffect(() => {
-    if (!user) {
+    if (!isInitialized) return;
+    if (!member) {
       router.replace('/login?next=/profile');
     }
-  }, [router, user]);
+  }, [isInitialized, member, router]);
 
   React.useEffect(() => {
-    if (user?.name) {
-      setProfile((prev) => ({
-        ...prev,
-        displayName: user.name ?? prev.displayName,
-      }));
-    }
-  }, [user?.name]);
+    if (!isInitialized || !member) return;
+
+    let active = true;
+    setLoadingProfile(true);
+
+    readProfile()
+      .then((memberProfile) => {
+        if (!active) return;
+        setProfile({
+          displayName: memberProfile.displayName ?? '',
+          bio: memberProfile.bio ?? '',
+          website: memberProfile.website ?? '',
+          location: memberProfile.location ?? '',
+          preferredGenres: memberProfile.preferredGenres ?? [],
+        });
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        const message =
+          error instanceof APIError
+            ? error.status === 401
+              ? 'Your session has expired. Please sign in again.'
+              : error.message
+            : 'We could not load your profile. Please try again.';
+        setSnackbar({ open: true, type: 'error', message });
+        if (error instanceof APIError && error.status === 401) {
+          void refreshMember();
+          router.replace('/login?next=/profile');
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoadingProfile(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isInitialized, member, refreshMember, router]);
 
   const handleToggleEdit = React.useCallback(() => {
-    if (isSubmitting) return;
+    if (isSubmitting || isDeleting || loadingProfile) return;
     setIsEditing((prev) => !prev);
     setValidationErrors({});
-  }, [isSubmitting]);
+  }, [isDeleting, isSubmitting, loadingProfile]);
 
   const handleSubmit = React.useCallback(
     async (values: ProfileInfoFormValues) => {
@@ -92,17 +130,36 @@ export default function ProfilePage() {
 
       setIsSubmitting(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        setProfile(values);
+        const updated = await updateProfile({
+          displayName: values.displayName.trim(),
+          bio: values.bio.trim() || undefined,
+          website: values.website.trim() || undefined,
+          location: values.location.trim() || undefined,
+          preferredGenres: values.preferredGenres,
+        });
+        setProfile({
+          displayName: updated.displayName ?? values.displayName,
+          bio: updated.bio ?? '',
+          website: updated.website ?? '',
+          location: updated.location ?? '',
+          preferredGenres: updated.preferredGenres ?? [],
+        });
+        await refreshMember();
         setSnackbar({ open: true, type: 'success', message: 'Profile updated successfully.' });
         setIsEditing(false);
       } catch (error) {
-        setSnackbar({ open: true, type: 'error', message: 'We could not save your profile. Try again.' });
+        const message =
+          error instanceof APIError
+            ? error.status === 422
+              ? 'Some details were invalid. Please review the highlighted fields.'
+              : error.message
+            : 'We could not save your profile. Try again.';
+        setSnackbar({ open: true, type: 'error', message });
       } finally {
         setIsSubmitting(false);
       }
     },
-    [],
+    [refreshMember],
   );
 
   const handleAvatarChange = React.useCallback((file: File) => {
@@ -113,9 +170,39 @@ export default function ProfilePage() {
     });
   }, []);
 
-  if (!user) {
+  const handleDeleteAccount = React.useCallback(async () => {
+    if (isDeleting) return;
+    const confirmed =
+      typeof window !== 'undefined'
+        ? window.confirm(
+            'Deleting your account will remove your profile and access to the AI Library. This action cannot be undone. Continue?',
+          )
+        : false;
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteProfile();
+      await refreshMember();
+      setSnackbar({ open: true, type: 'success', message: 'Your account has been deleted.' });
+      router.replace('/');
+    } catch (error) {
+      const message =
+        error instanceof APIError ? error.message : 'We could not delete your account. Please try again.';
+      setSnackbar({ open: true, type: 'error', message });
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [isDeleting, refreshMember, router]);
+
+  if (!member) {
     return null;
   }
+
+  const disabled = loadingProfile || isDeleting;
 
   return (
     <Container
@@ -129,18 +216,18 @@ export default function ProfilePage() {
       }}
     >
       <ProfileHeaderCard
-        name={profile.displayName}
-        email={user?.email ?? 'reader@example.com'}
-        avatarUrl={user?.avatarUrl}
-        isEditing={isEditing}
+        name={profile.displayName || member.displayName || member.email}
+        email={member.email}
+        avatarUrl={member.avatarUrl}
+        isEditing={isEditing && !disabled}
         onEditToggle={handleToggleEdit}
         onAvatarChange={handleAvatarChange}
       />
 
       <ProfileInfoForm
         defaultValues={profile}
-        isEditing={isEditing}
-        isSubmitting={isSubmitting}
+        isEditing={isEditing && !disabled}
+        isSubmitting={isSubmitting || loadingProfile}
         onSubmit={handleSubmit}
         onEditRequest={handleToggleEdit}
         validationErrors={validationErrors}
@@ -151,6 +238,26 @@ export default function ProfilePage() {
         reviewsCount={INITIAL_ACTIVITY.reviewsCount}
         recentlyViewed={INITIAL_ACTIVITY.recentlyViewed}
       />
+
+      <Stack
+        direction="row"
+        justifyContent="flex-end"
+        alignItems="center"
+        spacing={2}
+        sx={{
+          backgroundColor: 'background.paper',
+          borderRadius: 3,
+          border: '1px solid rgba(15, 23, 42, 0.08)',
+          p: { xs: 2, md: 3 },
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          Need to leave the library? You can permanently remove your account.
+        </Typography>
+        <Button variant="outlined" color="error" onClick={handleDeleteAccount} disabled={isDeleting || loadingProfile}>
+          {isDeleting ? 'Deleting account…' : 'Delete account'}
+        </Button>
+      </Stack>
 
       <Snackbar
         open={snackbar.open}

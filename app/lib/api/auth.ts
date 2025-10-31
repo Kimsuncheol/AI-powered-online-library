@@ -44,7 +44,7 @@ export class APIError extends Error {
   }
 }
 
-function resolveUrl(path: string) {
+export function resolveUrl(path: string) {
   if (!API_BASE_URL) return path;
   return `${API_BASE_URL}${path}`;
 }
@@ -62,7 +62,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   return undefined as T;
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
+export async function handleResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
     return parseResponse<T>(response);
   }

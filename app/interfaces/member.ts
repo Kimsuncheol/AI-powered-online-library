@@ -7,6 +7,8 @@ export interface Member {
     role: 'user' | 'admin';
     bio?: string;                    // 간단한 소개 (옵션)
     location?: string;               // 지역 정보 (옵션)
+    website?: string;                // 개인 웹사이트 (옵션)
+    preferredGenres?: string[];      // 선호 장르
     createdAt: string;               // ISO Date
     updatedAt?: string;
 }

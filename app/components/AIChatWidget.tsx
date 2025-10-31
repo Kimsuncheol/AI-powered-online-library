@@ -72,7 +72,7 @@ export default function AIChatWidget({
               color: message.from === 'user' ? 'primary.contrastText' : 'text.primary',
               px: 2,
               py: 1.2,
-              borderRadius: 3,
+              borderRadius: 1,
               boxShadow: message.from === 'user' ? '0 8px 16px rgba(59,130,246,0.25)' : 'none',
               maxWidth: '85%',
             }}
