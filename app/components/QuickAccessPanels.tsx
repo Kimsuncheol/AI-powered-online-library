@@ -50,7 +50,7 @@ const defaultActions: QuickAction[] = [
 export default function QuickAccessPanels({ title, actions = defaultActions }: QuickAccessPanelsProps) {
   return (
     <Box component="section">
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+      <Typography variant="h5" sx={{ color: "text.primary", fontWeight: 700, mb: 2 }}>
         {title}
       </Typography>
       <Stack

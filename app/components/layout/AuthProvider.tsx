@@ -2,6 +2,9 @@
 
 import * as React from 'react';
 
+import type { Member } from '@/app/interfaces/member';
+import { useAuthContext } from '@/app/context/AuthContext';
+
 export interface AuthUser {
   name: string;
   email: string;
@@ -18,7 +21,7 @@ export interface AuthContextValue {
   closeSignup: () => void;
   completeLogin: (user: AuthUser) => void;
   completeSignup: (user: AuthUser) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
@@ -32,9 +35,11 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<AuthUser | null>(null);
+  const { member, signOut, isInitialized } = useAuthContext();
   const [loginOpen, setLoginOpen] = React.useState(false);
   const [signupOpen, setSignupOpen] = React.useState(false);
+
+  const user = React.useMemo<AuthUser | null>(() => (member ? mapMemberToAuthUser(member) : null), [member]);
 
   const contextValue = React.useMemo<AuthContextValue>(
     () => ({
@@ -52,17 +57,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
       closeSignup: () => setSignupOpen(false),
       completeLogin: (nextUser) => {
-        setUser(nextUser);
+        void nextUser;
         setLoginOpen(false);
       },
       completeSignup: (nextUser) => {
-        setUser(nextUser);
+        void nextUser;
         setSignupOpen(false);
       },
-      logout: () => setUser(null),
+      logout: async () => {
+        await signOut();
+      },
     }),
-    [user, loginOpen, signupOpen],
+    [user, loginOpen, signupOpen, signOut],
   );
 
+  if (!isInitialized) {
+    return null;
+  }
+
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+}
+
+function mapMemberToAuthUser(member: Member): AuthUser {
+  return {
+    name: member.displayName || member.email,
+    email: member.email,
+    avatarUrl: member.avatarUrl,
+  };
 }

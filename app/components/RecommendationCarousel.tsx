@@ -26,7 +26,7 @@ export default function RecommendationCarousel({ title, subtitle, items }: Recom
       <Stack spacing={1.5} sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" spacing={1.5}>
           <TrendingUpRoundedIcon color="secondary" />
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          <Typography variant="h5" sx={{ color: "text.primary", fontWeight: 700 }}>
             {title}
           </Typography>
         </Stack>

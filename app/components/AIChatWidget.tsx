@@ -36,13 +36,15 @@ export default function AIChatWidget({
       sx={{
         position: { xs: 'relative', md: 'sticky' },
         top: { md: 120 },
-        borderRadius: 4,
+        borderRadius: 2,
         px: 3,
         py: 3,
         display: 'flex',
         flexDirection: 'column',
         gap: 2.5,
-        minWidth: { xs: 'auto', md: 320 },
+        minWidth: { xs: 'auto', md: 280 },
+        width: '100%',
+        maxWidth: { xs: '100%', md: 340 },
         bgcolor: 'background.paper',
       }}
     >

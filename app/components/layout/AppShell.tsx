@@ -5,7 +5,8 @@ import dynamic from 'next/dynamic';
 import { Box } from '@mui/material';
 
 import Header from './Header';
-import { AuthProvider, useAuth } from './AuthProvider';
+import { AuthProvider as AuthUIProvider, useAuth } from './AuthProvider';
+import { AuthProvider as AuthSessionProvider } from '@/app/context/AuthContext';
 
 const LoginModal = dynamic(() => import('../auth/LoginModal'), {
   loading: () => null,
@@ -26,14 +27,14 @@ function ShellContent({ children }: { children: React.ReactNode }) {
     useAuth();
 
   const handleLoginSuccess = React.useCallback(
-    (nextUser: { name: string; email: string }) => {
+    (nextUser: { name: string; email: string; avatarUrl?: string }) => {
       completeLogin(nextUser);
     },
     [completeLogin],
   );
 
   const handleSignupSuccess = React.useCallback(
-    (nextUser: { name: string; email: string }) => {
+    (nextUser: { name: string; email: string; avatarUrl?: string }) => {
       completeSignup(nextUser);
     },
     [completeSignup],
@@ -64,8 +65,10 @@ function ShellContent({ children }: { children: React.ReactNode }) {
 
 export default function AppShell({ children }: AppShellProps) {
   return (
-    <AuthProvider>
-      <ShellContent>{children}</ShellContent>
-    </AuthProvider>
+    <AuthSessionProvider>
+      <AuthUIProvider>
+        <ShellContent>{children}</ShellContent>
+      </AuthUIProvider>
+    </AuthSessionProvider>
   );
 }

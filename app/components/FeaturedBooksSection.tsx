@@ -38,7 +38,7 @@ export default function FeaturedBooksSection({
   return (
     <Box component="section">
       <Stack spacing={2} sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>
+        <Typography variant="h4" sx={{ color: "text.primary", fontWeight: 700 }}>
           {title}
         </Typography>
         {description ? (
@@ -70,8 +70,8 @@ export default function FeaturedBooksSection({
                   ) : (
                     <CardMedia
                       component="img"
-                      image={item.coverImage}
-                      alt={`${item.title} cover`}
+                      image={item?.coverImage}
+                      alt={`${item?.title} cover`}
                       sx={{
                         height: 220,
                         objectFit: 'cover',
@@ -92,10 +92,10 @@ export default function FeaturedBooksSection({
                       <>
                         <Stack spacing={0.5}>
                           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                            {item.title}
+                            {item?.title}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            {item.author}
+                            {item?.author}
                           </Typography>
                         </Stack>
                         <Chip
@@ -105,7 +105,7 @@ export default function FeaturedBooksSection({
                           sx={{ alignSelf: 'flex-start', fontWeight: 600 }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          {item.aiSummary}
+                          {item?.aiSummary}
                         </Typography>
                       </>
                     )}
