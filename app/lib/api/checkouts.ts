@@ -41,7 +41,24 @@ export async function createCheckout(payload: CheckoutCreate): Promise<CheckoutO
 export async function listCheckouts(params?: ListParams): Promise<CheckoutOut[]> {
   const query = makeQuery(params);
   const url = `${CHECKOUTS_ENDPOINT}${query}`;
-  return get<CheckoutOut[]>(url);
+  let totalHeaderValue: number | undefined;
+  const items = await get<CheckoutOut[]>(url, {
+    onResponse: (response) => {
+      const rawTotal = response.headers.get('x-total-count') ?? response.headers.get('x-total');
+      if (rawTotal) {
+        const parsed = Number(rawTotal);
+        if (!Number.isNaN(parsed)) {
+          totalHeaderValue = parsed;
+        }
+      }
+    },
+  });
+
+  if (typeof totalHeaderValue === 'number') {
+    (items as CheckoutOut[] & { total?: number }).total = totalHeaderValue;
+  }
+
+  return items;
 }
 
 export async function getCheckout(id: string): Promise<CheckoutOut> {

@@ -10,6 +10,8 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LibraryAddRoundedIcon from '@mui/icons-material/LibraryAddRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import HistoryEduRoundedIcon from '@mui/icons-material/HistoryEduRounded';
+import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 
 import { useAuth } from './AuthProvider';
 
@@ -104,6 +106,22 @@ export default function UserMenu({ hideEmail = false }: UserMenuProps) {
               <PeopleRoundedIcon fontSize="small" />
             </ListItemIcon>
             Manage Members
+          </MenuItem>
+        )}
+        {user.role === 'admin' && (
+          <MenuItem component={Link} href="/admin/loans" onClick={handleCloseMenu}>
+            <ListItemIcon>
+              <HistoryEduRoundedIcon fontSize="small" />
+            </ListItemIcon>
+            Loan History
+          </MenuItem>
+        )}
+        {user.role !== 'admin' && (
+          <MenuItem component={Link} href="/loans" onClick={handleCloseMenu}>
+            <ListItemIcon>
+              <HistoryRoundedIcon fontSize="small" />
+            </ListItemIcon>
+            My Loans
           </MenuItem>
         )}
         <MenuItem component={Link} href="/library" onClick={handleCloseMenu}>

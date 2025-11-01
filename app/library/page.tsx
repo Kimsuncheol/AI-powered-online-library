@@ -90,10 +90,10 @@ export default function MyLibraryPage() {
       return checkout as CheckoutWithBook;
     }
 
-    if ((checkout as CheckoutWithBook).book) {
+    if ((checkout as CheckoutWithBook).bookDetails) {
       return {
         ...checkout,
-        bookDetails: (checkout as CheckoutWithBook).book ?? null,
+        bookDetails: (checkout as CheckoutWithBook).bookDetails ?? null,
       };
     }
 
@@ -229,7 +229,7 @@ export default function MyLibraryPage() {
 
   const computedCheckouts = React.useMemo<CheckoutWithComputed[]>(() => {
     return checkouts.map((checkout) => {
-      const book = checkout.bookDetails ?? (checkout.book as BookOut | undefined) ?? null;
+      const book = checkout.bookDetails ?? (checkout.bookDetails as BookOut | undefined) ?? null;
       return {
         ...checkout,
         book,
