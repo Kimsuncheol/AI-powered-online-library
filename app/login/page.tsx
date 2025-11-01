@@ -242,7 +242,7 @@ export default function LoginPage() {
               </Stack>
             </CardContent>
 
-            <Stack direction="row" spacing={1} justifyContent="center">
+            <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
               <Typography variant="body2" color="text.secondary">
                 {"Don't have an account?"}
               </Typography>
