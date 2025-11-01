@@ -134,6 +134,11 @@ export default function SignupModal({ open, onClose, onSuccess, onSwitchToLogin 
         ? 'Strong password'
         : PASSWORD_HELPER_TEXT
       : PASSWORD_HELPER_TEXT);
+  const passwordsMatch =
+    values.confirmPassword.trim().length > 0 && values.password.trim().length > 0 && values.confirmPassword === values.password;
+  const confirmHelperText =
+    errors.confirmPassword ??
+    (values.confirmPassword.trim().length > 0 ? (passwordsMatch ? 'Passwords match.' : 'Passwords do not match.') : '');
 
   const validate = () => {
     const nextErrors: SignupFormErrors = {};
@@ -264,9 +269,6 @@ export default function SignupModal({ open, onClose, onSuccess, onSwitchToLogin 
             }}
             sx={autofillSx}
           />
-          <Typography variant="caption" color={passwordRegex.test(values.password) ? 'success.main' : 'text.secondary'}>
-            {values.password ? (passwordRegex.test(values.password) ? 'Strong password' : PASSWORD_HELPER_TEXT) : PASSWORD_HELPER_TEXT}
-          </Typography>
           <TextField
             required
             fullWidth
@@ -275,7 +277,16 @@ export default function SignupModal({ open, onClose, onSuccess, onSwitchToLogin 
             value={values.confirmPassword}
             onChange={handleChange('confirmPassword')}
             error={Boolean(errors.confirmPassword)}
-            helperText={errors.confirmPassword}
+            helperText={confirmHelperText}
+            FormHelperTextProps={{
+              sx: {
+                color: errors.confirmPassword
+                  ? 'error.main'
+                  : passwordsMatch
+                    ? 'success.main'
+                    : 'text.secondary',
+              },
+            }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
