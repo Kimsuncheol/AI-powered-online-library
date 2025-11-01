@@ -102,7 +102,7 @@ export async function signOut(): Promise<void> {
 
 export async function readCurrentMember(): Promise<Member | null> {
   try {
-    const result = await get<unknown>(ME_ENDPOINT, {});
+    const result = await get<unknown>(ME_ENDPOINT, { suppressUnauthorizedEvent: true });
     if (result === null || typeof result === 'undefined') {
       return null;
     }

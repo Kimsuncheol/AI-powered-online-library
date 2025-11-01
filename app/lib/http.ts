@@ -24,6 +24,7 @@ export class HttpError extends Error {
 export interface HttpRequestOptions extends RequestInit {
   json?: unknown;
   onResponse?: (response: Response) => void;
+  suppressUnauthorizedEvent?: boolean;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
@@ -130,7 +131,7 @@ function extractMessage(data: unknown, fallback: string): string {
 export async function fetchJson<T>(input: string, options: HttpRequestOptions = {}): Promise<T> {
   ensureInteractionTracking();
 
-  const { json, headers: initHeaders, body: initBody, onResponse, ...rest } = options;
+  const { json, headers: initHeaders, body: initBody, onResponse, suppressUnauthorizedEvent, ...rest } = options;
   const headers = getHeaders(initHeaders);
 
   let body: BodyInit | null | undefined = initBody as BodyInit | null | undefined;
@@ -155,7 +156,9 @@ export async function fetchJson<T>(input: string, options: HttpRequestOptions = 
   const data = (await parseBody(response)) as T;
 
   if (response.status === 401 || response.status === 419) {
-    dispatchUnauthorized(buildUnauthorizedDetail(response.status, input));
+    if (!suppressUnauthorizedEvent) {
+      dispatchUnauthorized(buildUnauthorizedDetail(response.status, input));
+    }
     throw new HttpError('Unauthorized', response.status, data);
   }
 
