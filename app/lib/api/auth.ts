@@ -24,6 +24,40 @@ interface SignInEnvelope {
   [key: string]: unknown;
 }
 
+const ACCESS_TOKEN_KEY = 'library:access_token';
+const REFRESH_TOKEN_KEY = 'library:refresh_token';
+
+function getClientStorage(): Storage | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+export function getStoredAccessToken(): string | null {
+  const storage = getClientStorage();
+  if (!storage) {
+    return null;
+  }
+
+  return storage.getItem(ACCESS_TOKEN_KEY);
+}
+
+export function clearStoredTokens(): void {
+  const storage = getClientStorage();
+  if (!storage) {
+    return;
+  }
+
+  storage.removeItem(ACCESS_TOKEN_KEY);
+  storage.removeItem(REFRESH_TOKEN_KEY);
+}
+
 function isMember(payload: unknown): payload is Member {
   return Boolean(payload) && typeof payload === 'object' && 'email' in (payload as Record<string, unknown>);
 }
